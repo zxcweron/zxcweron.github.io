@@ -3,74 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Поддержка Максимов</title>
+    <title>Генератор текстовых ссылок (чтобы телеграм не банил)</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
             background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
             color: #333;
         }
         .container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
             background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         h1 {
-            color: #e74c3c;
+            color: #24292e;
+            text-align: center;
+            margin-bottom: 30px;
         }
-        .support-box {
-            margin: 30px 0;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            border-left: 5px solid #e74c3c;
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 16px;
+            margin-bottom: 20px;
+            resize: vertical;
         }
-        .telegram-link {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: #0088cc;
+        button {
+            background-color: #28a745;
             color: white;
-            text-decoration: none;
-            border-radius: 5px;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
             font-weight: bold;
+            display: block;
+            margin: 0 auto;
+            transition: background-color 0.2s;
         }
-        .telegram-link:hover {
-            background-color: #006699;
+        button:hover {
+            background-color: #218838;
         }
-        footer {
+        .result {
             margin-top: 30px;
-            font-size: 0.9em;
-            color: #777;
+            padding: 15px;
+            background-color: #f6f8fa;
+            border-radius: 4px;
+            border: 1px solid #e1e4e8;
+            word-break: break-all;
+        }
+        .hidden {
+            display: none;
+        }
+        .link {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+        .instructions {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f1f8ff;
+            border-left: 4px solid #0366d6;
+            border-radius: 4px;
+        }
+        .text-display {
+            white-space: pre-wrap;
+            background-color: white;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid #e1e4e8;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Поддержка бедных Максимов</h1>
-        <p>Наши Максимы переживают не лучшие времена и нуждаются в вашей помощи!</p>
+        <h1>Генератор текстовых ссылок</h1>
         
-        <div class="support-box">
-            <h2>Как помочь?</h2>
-            <p>Если вы хотите поддержать Максима материально или морально, свяжитесь с нами:</p>
-            <a href="https://t.me/zxcarnagezz" class="telegram-link">Написать в Telegram @zxcarnagezz</a>
+        <div id="input-section">
+            <textarea id="text-input" placeholder="Введите ваш текст здесь..."></textarea>
+            <button id="generate-btn">Генерация</button>
         </div>
         
-        <div>
-            <h2>Почему Максимы нуждаются в помощи?</h2>
-            <p>Максимы - уязвимая группа населения, страдающая от нехватки понимания, мемов и финансовой поддержки.</p>
-            <p>Ваша помощь может изменить жизнь хотя бы одного Максима!</p>
+        <div id="result-section" class="hidden">
+            <h3>Ваша ссылка готова:</h3>
+            <div class="result">
+                <a id="generated-link" class="link" target="_blank"></a>
+            </div>
+            <button id="new-generation" style="background-color: #6c757d; margin-top: 15px;">Создать новую ссылку</button>
         </div>
         
-        <footer>
-            <p>© 2025 Фонд поддержки бедных Максимов. Все права защищены.</p>
-        </footer>
+        <div id="text-display" class="hidden">
+            <h3>Текст из ссылки:</h3>
+            <div class="text-display" id="displayed-text"></div>
+            <button id="go-back" style="margin-top: 15px;">Вернуться к генератору</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>Как это работает?</h3>
+            <p>1. Введите текст в поле выше</p>
+            <p>2. Нажмите кнопку "Генерация"</p>
+            <p>3. Скопируйте полученную ссылку и поделитесь ею</p>
+            <p>4. При переходе по ссылке будет отображаться ваш текст</p>
+        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const textInput = document.getElementById('text-input');
+            const generateBtn = document.getElementById('generate-btn');
+            const resultSection = document.getElementById('result-section');
+            const generatedLink = document.getElementById('generated-link');
+            const newGenerationBtn = document.getElementById('new-generation');
+            const textDisplaySection = document.getElementById('text-display');
+            const displayedText = document.getElementById('displayed-text');
+            const goBackBtn = document.getElementById('go-back');
+            const inputSection = document.getElementById('input-section');
+            
+            // Проверяем, есть ли текст в хэше URL для отображения
+            if (window.location.hash) {
+                try {
+                    const textFromHash = decodeURIComponent(window.location.hash.substring(1));
+                    displayedText.textContent = textFromHash;
+                    inputSection.classList.add('hidden');
+                    resultSection.classList.add('hidden');
+                    textDisplaySection.classList.remove('hidden');
+                } catch (e) {
+                    console.error('Ошибка декодирования текста из URL:', e);
+                }
+            }
+            
+            // Генерация ссылки
+            generateBtn.addEventListener('click', function() {
+                const text = textInput.value.trim();
+                if (text) {
+                    const encodedText = encodeURIComponent(text);
+                    const currentUrl = window.location.href.split('#')[0];
+                    const link = currentUrl + '#' + encodedText;
+                    
+                    generatedLink.href = link;
+                    generatedLink.textContent = link;
+                    
+                    resultSection.classList.remove('hidden');
+                } else {
+                    alert('Пожалуйста, введите текст для генерации ссылки');
+                }
+            });
+            
+            // Новая генерация
+            newGenerationBtn.addEventListener('click', function() {
+                resultSection.classList.add('hidden');
+                textInput.value = '';
+                textInput.focus();
+            });
+            
+            // Вернуться к генератору
+            goBackBtn.addEventListener('click', function() {
+                window.location.href = window.location.href.split('#')[0];
+            });
+        });
+    </script>
 </body>
 </html>
